@@ -59,7 +59,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -96,6 +95,7 @@ func verifyHS256(token string, secret []byte) (claims, error) {
 	if !hmac.Equal(expected, sigRaw) {
 		return nil, fmt.Errorf("invalid signature")
 	}
+
 	// check exp if present
 	if expv, ok := cl["exp"]; ok {
 		switch t := expv.(type) {
@@ -110,6 +110,7 @@ func verifyHS256(token string, secret []byte) (claims, error) {
 			}
 		}
 	}
+
 	return cl, nil
 }
 
@@ -131,9 +132,13 @@ func main() {
 	}
 	proxy := httputil.NewSingleHostReverseProxy(upURL)
 	origDirector := proxy.Director
-	proxy.Director = func(req *http.Request) { origDirector(req); req.Host = upURL.Host }
+	proxy.Director = func(req *http.Request) {
+		origDirector(req)
+		req.Host = upURL.Host
+	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// get token from query or header
 		token := r.URL.Query().Get("token")
 		if token == "" {
 			token = r.Header.Get("X-Auth-Token")
@@ -144,21 +149,26 @@ func main() {
 				token = strings.TrimSpace(auth[7:])
 			}
 		}
+
 		if token == "" {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="noVNC"`)
 			http.Error(w, "token required", http.StatusUnauthorized)
 			log.Printf("unauthorized: no token for %s %s", r.RemoteAddr, r.URL.Path)
 			return
 		}
+
 		_, err := verifyHS256(token, secret)
 		if err != nil {
 			http.Error(w, "invalid token: "+err.Error(), http.StatusUnauthorized)
 			log.Printf("invalid token for %s %s: %v", r.RemoteAddr, r.URL.Path, err)
 			return
 		}
+
+		// remove token from query before forwarding
 		q := r.URL.Query()
 		q.Del("token")
 		r.URL.RawQuery = q.Encode()
+
 		proxy.ServeHTTP(w, r)
 	})
 
@@ -179,7 +189,7 @@ JWT=$(python3 - <<PY
 import time, hmac, hashlib, base64, json
 secret=b"$JWT_SECRET"
 header=json.dumps({"alg":"HS256","typ":"JWT"}).encode()
-payload=json.dumps({"sub":"user1","exp":int(time.time())+54000}).encode()
+payload=json.dumps({"sub":"amit","exp":int(time.time())+54000}).encode()
 def b64u(b): return base64.urlsafe_b64encode(b).rstrip(b'=') 
 msg=b'.'.join([b64u(header),b64u(payload)])
 sig=hmac.new(secret,msg,hashlib.sha256).digest()
