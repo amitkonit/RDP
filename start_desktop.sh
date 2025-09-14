@@ -3,9 +3,15 @@ set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Install packages
+# Update and install required packages
 apt-get update -y
-apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq golang
+apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq golang wget gnupg2
+
+# Install Google Chrome
+echo "[INFO] Installing Google Chrome..."
+wget -q -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+dpkg -i /tmp/google-chrome.deb || apt-get install -fy -y
+rm -f /tmp/google-chrome.deb
 
 # Clone noVNC if not exists
 if [ ! -d "${HOME}/noVNC" ]; then
@@ -47,7 +53,5 @@ cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read
     if [[ "$line" =~ https://[a-zA-Z0-9.-]+\.trycloudflare\.com ]]; then
         URL=$(echo "$line" | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com')
         echo "[INFO] Your noVNC web URL: $URL/vnc.html"
-        # Optionally, break the loop so it stops reading once URL is found
-        # break
     fi
 done
