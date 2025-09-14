@@ -58,19 +58,27 @@ def requires_auth(f):
 @app.route('/<path:path>')
 @requires_auth
 def proxy(path):
+    # Build target URL (keep full path)
+    url = f"{TARGET}/{path}"
+    if request.query_string:
+        url += "?" + request.query_string.decode()
+
     resp = requests.request(
         method=request.method,
-        url=f"{TARGET}/{path}",
+        url=url,
         headers={k: v for k, v in request.headers if k.lower() != 'host'},
         data=request.get_data(),
         cookies=request.cookies,
         allow_redirects=False,
-        stream=True
+        stream=True,
     )
+
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
     headers = [(name, value) for (name, value) in resp.raw.headers.items()
                if name.lower() not in excluded_headers]
+
     return Response(resp.content, resp.status_code, headers)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080)
