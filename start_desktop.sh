@@ -14,7 +14,6 @@ pkill -f "Xvfb :0" || true
 pkill -f "startxfce4" || true
 pkill -f "x11vnc -display :0" || true
 pkill -f "novnc_proxy" || true
-pkill -f "auth_proxy" || true
 
 echo "[INFO] Starting Xvfb..."
 Xvfb :0 -screen 0 1024x768x24 >/var/log/xvfb.log 2>&1 &
@@ -33,4 +32,11 @@ cd "${HOME}/noVNC"
 ./utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/var/log/novnc.log 2>&1 &
 sleep 1
 
-cloudflared tunnel --url http://localhost:6080 --no-autoupdate
+echo "[INFO] Starting Cloudflare Tunnel..."
+URL=$(cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' | head -n1)
+
+if [ -n "$URL" ]; then
+  echo "[INFO] Your noVNC web URL: $URL/vnc.html"
+else
+  echo "[ERROR] Could not extract Cloudflare Tunnel URL."
+fi
