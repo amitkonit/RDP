@@ -74,4 +74,4 @@ echo "=============================="
 echo ""
 
 # --- Start cloudflared ---
-cloudflared tunnel --url http://localhost:8080 --no-autoupdate
+cloudflared tunnel --url http://localhost:6080 --no-autoupdate
