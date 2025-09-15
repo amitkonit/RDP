@@ -28,7 +28,7 @@ pkill -f "x11vnc -display :0" || true
 pkill -f "novnc_proxy" || true
 
 echo "[INFO] Starting Xvfb..."
-Xvfb :0 -screen 0 1024x768x24 >/var/log/xvfb.log 2>&1 &
+Xvfb :0 -screen 0 1920x1080x24 >/var/log/xvfb.log 2>&1 &
 sleep 1
 
 echo "[INFO] Starting XFCE..."
