@@ -19,6 +19,13 @@ if [ ! -d "${HOME}/noVNC" ]; then
 fi
 chmod +x "${HOME}/noVNC/utils/novnc_proxy"
 
+if ! command -v cloudflared &> /dev/null; then
+  echo "[INFO] Installing cloudflared..."
+  curl -L -o /usr/local/bin/cloudflared \
+    "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
+  chmod +x /usr/local/bin/cloudflared
+fi
+
 # Kill previous sessions
 pkill -f "Xvfb :0" || true
 pkill -f "startxfce4" || true
