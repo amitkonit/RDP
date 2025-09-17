@@ -13,13 +13,13 @@ rm -f /tmp/google-chrome.deb
 if [ ! -d "${HOME}/noVNC" ]; then
   git clone https://github.com/novnc/noVNC.git "${HOME}/noVNC"
 fi
-chmod +x "${HOME}/noVNC/utils/novnc_proxy"
+sudo chmod +x "${HOME}/noVNC/utils/novnc_proxy"
 
 if ! command -v cloudflared &> /dev/null; then
   echo "[INFO] Installing cloudflared..."
   curl -L -o /usr/local/bin/cloudflared \
     "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
-  chmod +x /usr/local/bin/cloudflared
+  sudo chmod +x /usr/local/bin/cloudflared
 fi
 
 pkill -f "Xvfb :0" || true
@@ -45,7 +45,7 @@ cd "${HOME}/noVNC"
 sleep 1
 
 echo "[INFO] Starting Cloudflare Tunnel..."
-cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read -r line; do
+sudo cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read -r line; do
     echo "$line"
     if [[ "$line" =~ https://[a-zA-Z0-9.-]+\.trycloudflare\.com ]]; then
         URL=$(echo "$line" | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com')
