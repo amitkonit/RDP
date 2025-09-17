@@ -2,12 +2,12 @@
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
-apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq wget
+sudo apt-get update -y
+sudo apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq wget
 
 echo "[INFO] Installing Google Chrome..."
 wget -q -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-dpkg -i /tmp/google-chrome.deb || apt-get install -fy -y
+sudo dpkg -i /tmp/google-chrome.deb || apt-get install -fy -y
 rm -f /tmp/google-chrome.deb
 
 if [ ! -d "${HOME}/noVNC" ]; then
