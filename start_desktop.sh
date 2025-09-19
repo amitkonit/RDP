@@ -2,24 +2,24 @@
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update -y
-sudo apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq wget
+apt-get update -y
+apt-get install -y xfce4 xfce4-goodies x11vnc xvfb python3 python3-pip git curl jq wget
 
 echo "[INFO] Installing Google Chrome..."
 wget -q -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i /tmp/google-chrome.deb || apt-get install -fy -y
+dpkg -i /tmp/google-chrome.deb || apt-get install -fy -y
 rm -f /tmp/google-chrome.deb
 
 if [ ! -d "${HOME}/noVNC" ]; then
   git clone https://github.com/novnc/noVNC.git "${HOME}/noVNC"
 fi
-sudo chmod +x "${HOME}/noVNC/utils/novnc_proxy"
+chmod +x "${HOME}/noVNC/utils/novnc_proxy"
 
 if ! command -v cloudflared &> /dev/null; then
   echo "[INFO] Installing cloudflared..."
-  sudo curl -L -o /usr/local/bin/cloudflared \
+  curl -L -o /usr/local/bin/cloudflared \
     "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
-  sudo chmod +x /usr/local/bin/cloudflared
+  chmod +x /usr/local/bin/cloudflared
 fi
 
 pkill -f "Xvfb :0" || true
@@ -45,7 +45,7 @@ cd "${HOME}/noVNC"
 sleep 1
 
 echo "[INFO] Starting Cloudflare Tunnel..."
-sudo cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read -r line; do
+cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read -r line; do
     echo "$line"
     if [[ "$line" =~ https://[a-zA-Z0-9.-]+\.trycloudflare\.com ]]; then
         URL=$(echo "$line" | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com')
