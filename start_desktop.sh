@@ -45,7 +45,7 @@ cd "${HOME}/noVNC"
 sleep 1
 
 echo "[INFO] Starting Cloudflare Tunnel..."
-cloudflared tunnel --url http://localhost:6080 --no-autoupdate 2>&1 | while read -r line; do
+cloudflared tunnel --url http://localhost:6080 --metrics 0.0.0.0:0 2>&1 | while read -r line; do
     echo "$line"
     if [[ "$line" =~ https://[a-zA-Z0-9.-]+\.trycloudflare\.com ]]; then
         URL=$(echo "$line" | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com')
